@@ -1,46 +1,65 @@
-# Download-Music-From-Listen1-Backup
+# Download-Music-From-Listen1-Backup（多平台 + 歌词增强版）
 
-批量下载Listen1歌单备份文件中的所有音乐
+批量下载 Listen1 歌单备份文件中的所有音乐，自动写入封面、歌手、专辑等信息，并抓取同名 `.lrc` 歌词文件。
 
-代码写的不咋地，第一次在github上传代码，没准有人需要吧
+> 本仓库在 [LanYangYang-114/Download-Music-From-Listen1-Backup](https://github.com/LanYangYang-114/Download-Music-From-Listen1-Backup) 的基础上做了增强：
+> - 新增 **酷我 / 酷狗 / bilibili** 三个平台的下载支持（原版只支持网易云、QQ）
+> - 新增 **歌词抓取**：每首歌生成同名 `.lrc`，多数带时间轴，播放器可滚动显示
+> - 文件名改为「歌名 - 歌手」，避免不同来源的同名歌互相覆盖
+> - 修复原版封面永远下不下来、`当前播放列表` 选中会崩溃等问题
+>
+> 做这个增强的初衷：**游泳时戴防水 MP3 播放器听歌**——把 Listen1 歌单整批转成本地 mp3 + lrc，拷进去就能边游边滚歌词，不用带手机、不用蓝牙跨水面。送给同样的游泳/跑步爱好者。
 
-# 关于本程序
+## 功能
 
-本程序可以自动下载歌单中的音乐为mp3文件，并给文件添加封面和歌手等信息，可在各类音乐播放器中正常显示信息，只支持windows，需要在linux用可以自行修改
+- 自动把歌单中的歌曲下载为 mp3 文件
+- 写入封面、标题、歌手、专辑等元数据，各类播放器可正常显示
+- 抓取歌词存为同名 `.lrc`（sidecar），支持滚动歌词的播放器可直接用
+- 支持平台：**网易云、QQ 音乐、酷我、酷狗、bilibili**
 
-![image](https://github.com/LanYangYang-114/Download-Music-From-Listen1-Backup/assets/84030410/27ca094f-cc51-442f-9de8-060cd570752f)
+## 支持范围与限制
 
-本程序并不能下载付费音乐，只能下载可免费收听的音乐，音质最高128kbps(没找到下载更高音质的方法)，想要高音质和需要付费的音乐建议使用官方音乐客户端
+- 只能下载**可免费收听**的歌曲，下载不了付费 / 会员 / DRM 歌曲
+- 音质最高约 128kbps（bilibili 为视频音轨转码）
+- 歌词时间轴取决于音源平台：多数歌曲能拿到带时间轴的歌词；少数用户上传的冷门曲目，匿名接口可能只返回纯文字甚至无歌词，此时会优雅跳过
+- 仅在 Windows 上测试（脚本内 ffmpeg 调用与路径为 Windows 风格，Linux/Mac 需自行修改）
 
-目前只支持下载歌单中来自网易云音乐和QQ音乐的曲目，其他平台还不会搞
+## 准备工作
 
-做这个程序的原因是学校教学楼的公用网络内没法使用Listen1听来自网易云音乐的歌，但我的歌单中绝大部分都来自网易云音乐，尝试各种办法无效，一不做二不休，直接全部下载下来到本地听，完美解决这个问题
+1. 安装 Python 3（建议 3.10+），并安装依赖：
 
-# 使用方法
-确保你的python环境中包含request库，并额外下载ffmpeg到你的电脑上
+   ```powershell
+   pip install -r requirements.txt
+   ```
 
-在Listen1设置中备份(导出)你的歌单
+2. 下载 Windows 版 [ffmpeg](https://www.gyan.dev/ffmpeg/builds/)，把其中的 `ffmpeg.exe` 复制到本程序同一目录下（本仓库不包含 ffmpeg.exe，体积太大）。
 
-![image](https://github.com/LanYangYang-114/Download-Music-From-Listen1-Backup/assets/84030410/de89d491-0752-4e63-bca9-2e8dc1b1d189)
+3. 在 Listen1 的「设置 → 备份 / 导出歌单」中导出你的歌单备份文件，放到本程序同一目录下，命名为 `listen1_backup.json`（若用别的文件名，需在运行时指定）。
 
-将备份出的歌单文件放在该程序同一目录下
+## 使用方法
 
-![image](https://github.com/LanYangYang-114/Download-Music-From-Listen1-Backup/assets/84030410/e471c1c0-6385-48ff-8e2e-f4647dd830aa)
+```powershell
+python main.py
+```
 
-如果你修改了歌单备份文件的文件名，你需要在程序最后手动添加文件名
+程序会列出备份文件里的所有歌单，输入对应序号即可开始下载。下载结果保存在 `output/歌单名/` 下，每首歌一个 `.mp3` 和（若有歌词）一个同名 `.lrc`。
 
-![image](https://github.com/LanYangYang-114/Download-Music-From-Listen1-Backup/assets/84030410/f43a373e-ecbb-4d30-8be2-3e989970fe0f)
+如果备份文件名不是默认的 `listen1_backup.json`，或想指定输出目录，可在代码中调用：
 
-如果你想输出到指定目录，你可以手动指定输出目录(默认使用output)，输出文件夹会创建在程序目录下
+```python
+from main import Main
+Main('你的备份文件.json', 'output')
+```
 
-![image](https://github.com/LanYangYang-114/Download-Music-From-Listen1-Backup/assets/84030410/90f89eaf-dcd4-4984-a9c7-475b3098e1ff)
+## 游泳 / 运动场景小贴士
 
-将ffmpeg.exe复制到该程序同一目录下
+把 `output/歌单名/` 里的 `.mp3` 和同名 `.lrc` 一起拷进防水 MP3 播放器的同一目录，支持歌词的播放器就能滚动显示歌词。
 
-![image](https://github.com/LanYangYang-114/Download-Music-From-Listen1-Backup/assets/84030410/555fa8e3-1e57-4ec5-a6a0-4456fd841b5f)
+## 致谢
 
-完成上述步骤后，运行main.py即可开始下载音乐
+- 原项目：[LanYangYang-114/Download-Music-From-Listen1-Backup](https://github.com/LanYangYang-114/Download-Music-From-Listen1-Backup)
+- 各平台接口参考自开源项目 [Listen1](https://github.com/listen1/listen1_chrome_extension)
 
-![image](https://github.com/LanYangYang-114/Download-Music-From-Listen1-Backup/assets/84030410/4341bbe9-6aa1-4962-9f25-7d5e8d253c12)
+## 免责声明
 
-![image](https://github.com/LanYangYang-114/Download-Music-From-Listen1-Backup/assets/84030410/a3255cc2-f46d-40e6-992c-715ba37d95c5)
+本工具仅用于个人学习与已可免费收听内容的本地留存，请勿用于任何商业用途或传播。下载内容的版权归各音乐平台及版权方所有，请支持正版。

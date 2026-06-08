@@ -1,0 +1,21 @@
+# ffmpeg 二进制(体积大,请自行下载放到本目录)
+ffmpeg.exe
+
+# 下载输出与日志
+output/
+log.txt
+
+# 个人歌单备份(含你的歌单数据,不要提交)
+listen1_backup.json
+*.listen1.json
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# 编辑器/系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
